@@ -1,0 +1,27 @@
+# Bog'liqliklar
+node_modules/
+
+# Build natijalari
+.next/
+out/
+dist/
+
+# Maxfiy ma'lumotlar — HECH QACHON GitHub'ga tushmasin
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env.local
+
+# Loglar va vaqtinchalik fayllar
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Muharrir sozlamalari
+.vscode/
+.idea/
+
+# TypeScript build keshi
+*.tsbuildinfo

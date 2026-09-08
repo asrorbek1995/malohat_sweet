@@ -1,0 +1,164 @@
+// ================================================================
+//  Malohat pishiriqlari — Ma'lumotlar bazasi sxemasi (PostgreSQL)
+// ================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Foydalanuvchi rollari
+enum Role {
+  USER
+  ADMIN
+}
+
+/// Buyurtma holatlari
+enum OrderStatus {
+  NEW        // Yangi
+  CONFIRMED  // Tasdiqlangan
+  DELIVERED  // Yetkazilgan
+  CANCELLED  // Bekor qilingan
+}
+
+/// Story / Banner turlari
+enum MediaType {
+  STORY   // Bosh sahifadagi to'rtburchak storislar
+  BANNER  // Kategoriya / aksiya bannerlari
+}
+
+// ---------------------------------------------------------------
+//  Foydalanuvchi
+// ---------------------------------------------------------------
+model User {
+  id         Int      @id @default(autoincrement())
+  telegramId String   @unique @map("telegram_id")
+  name       String
+  username   String?
+  phone      String?
+  role       Role     @default(USER)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  orders Order[]
+
+  @@map("users")
+}
+
+// ---------------------------------------------------------------
+//  Kategoriya
+// ---------------------------------------------------------------
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  emoji     String?
+  sortOrder Int      @default(0) @map("sort_order")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  products Product[]
+
+  @@map("categories")
+}
+
+// ---------------------------------------------------------------
+//  Mahsulot
+// ---------------------------------------------------------------
+model Product {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String   @default("")
+  /// Tarkib va foydalar — bullet-pointlar ro'yxati
+  ingredients Json     @default("[]")
+  oldPrice    Decimal? @map("old_price") @db.Decimal(12, 2)
+  newPrice    Decimal  @map("new_price") @db.Decimal(12, 2)
+  imageUrl    String   @default("") @map("image_url")
+  categoryId  Int?     @map("category_id")
+  /// Savatchadagi qo'shimcha savdo (Order Bump) mahsulotimi?
+  isOrderBump Boolean  @default(false) @map("is_order_bump")
+  isBestSeller Boolean @default(false) @map("is_best_seller")
+  isActive    Boolean  @default(true) @map("is_active")
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([categoryId])
+  @@index([isOrderBump])
+  @@map("products")
+}
+
+// ---------------------------------------------------------------
+//  Buyurtma
+// ---------------------------------------------------------------
+model Order {
+  id           Int         @id @default(autoincrement())
+  customerName String      @map("customer_name")
+  phone        String?
+  address      String?
+  comment      String?
+  totalAmount  Decimal     @map("total_amount") @db.Decimal(12, 2)
+  /// [{ productId, title, price, quantity, isBump }]
+  items        Json
+  status       OrderStatus @default(NEW)
+  userId       Int?        @map("user_id")
+  telegramId   String?     @map("telegram_id")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+// ---------------------------------------------------------------
+//  Story / Banner
+// ---------------------------------------------------------------
+model Story {
+  id        Int       @id @default(autoincrement())
+  title     String    @default("")
+  subtitle  String    @default("")
+  imageUrl  String    @map("image_url")
+  linkUrl   String?   @map("link_url")
+  type      MediaType @default(STORY)
+  sortOrder Int       @default(0) @map("sort_order")
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([type])
+  @@map("stories")
+}
+
+// ---------------------------------------------------------------
+//  Yuklangan rasmlar
+//  Fayllar diskda emas, BAZADA saqlanadi — shunda Render/Vercel kabi
+//  vaqtinchalik fayl tizimli xostinglarda ham rasmlar yo'qolmaydi.
+// ---------------------------------------------------------------
+model Upload {
+  id        Int      @id @default(autoincrement())
+  /// URL'da ishlatiladigan fayl nomi
+  name      String   @unique
+  mimeType  String   @map("mime_type")
+  size      Int
+  data      Bytes
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("uploads")
+}
+
+// ---------------------------------------------------------------
+//  Sozlamalar (do'kon matnlari, valyuta va h.k.)
+// ---------------------------------------------------------------
+model Setting {
+  key   String @id
+  value String
+
+  @@map("settings")
+}

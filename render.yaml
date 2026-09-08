@@ -1,0 +1,41 @@
+# =============================================================
+#  Render uchun sozlama (Blueprint)
+#  Render'da "New +" -> "Blueprint" -> GitHub repo tanlansa,
+#  shu fayl avtomatik o'qiladi.
+#
+#  Maxfiy qiymatlar (sync: false) Render panelida qo'lda kiritiladi.
+# =============================================================
+services:
+  - type: web
+    name: malohat-backend
+    runtime: node
+    plan: free
+    region: frankfurt
+    rootDir: backend
+
+    # cloudflared ishlab chiqarishda kerak emas — 53 MB yuklab olmaymiz
+    buildCommand: npm install --omit=optional && npx prisma generate && npx prisma db push --accept-data-loss
+    startCommand: npm start
+
+    healthCheckPath: /health
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      # Tunnel faqat lokal ishlab chiqishda kerak
+      - key: USE_TUNNEL
+        value: "false"
+
+      # --- Quyidagilarni Render panelida qo'lda kiriting ---
+      - key: BOT_TOKEN
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_TELEGRAM_ID
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      # Frontend (Vercel) manzili — masalan https://malohat.vercel.app
+      - key: WEB_APP_URL
+        sync: false

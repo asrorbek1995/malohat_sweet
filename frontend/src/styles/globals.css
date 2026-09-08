@@ -1,0 +1,151 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ================================================================
+   Malohat pishiriqlari — global stillar
+   Fon HAMMA joyda OQ (#ffffff) bo'lishi shart.
+   ================================================================ */
+
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+  /* Do'kon nomi uchun nafis qo'lyozma shrift */
+  --font-script: 'Great Vibes', 'Playfair Display', cursive;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+
+  /* Pastki menyu va yopishqoq tugmalar uchun balandliklar */
+  --bottom-nav-h: 68px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Desktopda pastki menyu o'rniga tepadagi menyu ishlatiladi */
+@media (min-width: 1024px) {
+  :root {
+    --bottom-nav-h: 0px;
+  }
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  /* Telegram mavzusidan qat'i nazar — fon doim oq */
+  background: #ffffff !important;
+  color: #1a1a1a;
+  font-family: var(--font-sans);
+  overscroll-behavior-y: none;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Telegram WebApp o'z o'zgaruvchilarini qo'shsa ham oq fon saqlanadi */
+.tg-root {
+  background: #ffffff;
+}
+
+@layer components {
+  /* Gorizontal skroll — skrollbar ko'rinmaydi */
+  .scroll-x {
+    @apply flex gap-3 overflow-x-auto pb-1;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-snap-type: x proximity;
+  }
+  .scroll-x::-webkit-scrollbar {
+    display: none;
+  }
+
+  .card {
+    @apply rounded-2xl bg-white shadow-card;
+  }
+
+  /* Yangi narx — QIZIL */
+  .price-new {
+    @apply text-price font-bold;
+  }
+
+  /* Eski narx — ustidan chizilgan */
+  .price-old {
+    @apply text-gray-400 line-through text-sm font-medium;
+  }
+
+  .chip {
+    @apply whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-colors;
+  }
+  .chip-active {
+    @apply border-brand-500 bg-brand-500 text-white;
+  }
+  .chip-idle {
+    @apply border-gray-200 bg-white text-gray-600 active:bg-gray-50;
+  }
+
+  /* Sahifa pastida bo'sh joy — menyu ostida kontent yashirinmasligi uchun */
+  .pb-nav {
+    padding-bottom: calc(var(--bottom-nav-h) + var(--safe-bottom) + 16px);
+  }
+
+  /* Sahifa chetlari — telefon / planshet / desktop */
+  .px-page {
+    @apply px-5 md:px-7 lg:px-8;
+  }
+  .mx-page {
+    @apply mx-5 md:mx-7 lg:mx-8;
+  }
+
+  /* Do'kon nomining chiroyli ko'rinishi (gradient bilan) */
+  .brand-script {
+    font-family: var(--font-script);
+    background-image: linear-gradient(120deg, #ef4d78 0%, #d92e5c 45%, #951c3f 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    line-height: 1.05;
+    padding-bottom: 0.06em;
+  }
+
+  .brand-sub {
+    font-family: var(--font-display);
+    @apply uppercase text-gray-500;
+    letter-spacing: 0.36em;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+}
+
+/* Yuklanish skeletoni */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
